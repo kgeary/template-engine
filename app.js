@@ -1,6 +1,7 @@
 const fs = require("fs");
 const util = require("util");
 const inquirer = require("inquirer");
+const chalk = require('chalk')
 const Engineer = require("./lib/engineer");
 const Intern = require("./lib/intern");
 const Manager = require("./lib/manager");
@@ -33,12 +34,13 @@ const employeePrompt = [
     type: "list",
     message: "Select an employee type",
     name: "type",
-    choices: ["Engineer", "Intern", "Manager"],
+    choices: ["Engineer", "Intern"],
   },
   {
     type: "input",
     message: "Employee Name",
     name: "name",
+    validate: validateName,
   },
   {
     type: "input",
@@ -54,50 +56,65 @@ const employeePrompt = [
   },
 ];
 
+// Manager Prompt (Skip the select employee type question)
+const managerPrompt = employeePrompt.slice(1);
+
 // For specifying the special role
-const specialRoles = [
-  {
+const specialRoles = {
+  Engineer: {
     role: "Engineer",
     special: "Github Name",
     field: "github",
     validate: validateGithub,
   },
-  {
+  Manager: {
     role: "Manager",
     special: "Office Number",
     field: "officeNumber",
     validate: validateNumber,
   },
-  {
+  Intern: {
     role: "Intern",
     special: "School",
     field: "school",
   },
-];
+};
+
 
 //============================================================
-// Validate Number User Input
+// Validate User Input for Employee Name
+// input : user input response (string)
+//============================================================
+function validateName(input) {
+  if (!input.match(/^[A-Z][A-Z ]{0,}/i)) {
+      // Name must contain at least 1 character and may contain only letters and spaces. 
+  } else {
+    return true;
+  }
+}
+//============================================================
+// Validate User Input for Numeric Values
 // input : user input response (string)
 //============================================================
 function validateNumber(input) {
 
   if (!input.match(/^[0-9]+$/)) {
     return "Input must be a integer!";
-  };
-
-  return true;
+  } else {
+    return true;
+  }
 }
 
 //============================================================
-// Validate Email Address User Input
+// Validate User Input for Email Addresses
 // input : user input response (string)
 //============================================================
 function validateEmail(input) {
   if (!input.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
     return "Input must be a valid email address!";
-  };
-
-  return true;
+  } else {
+    return true;
+  }
 }
 
 //============================================================
@@ -117,7 +134,7 @@ function validateGithub(input) {
 // role : employee role (string)
 //============================================================
 function getSpecialRoleQuestion(role) {
-  const specialRole = specialRoles.find(x => x.role === role);
+  const specialRole = specialRoles[role];
   const msg = specialRole.special;
   const name = specialRole.field;
   const validate = specialRole.validate;
@@ -136,16 +153,31 @@ function getSpecialRoleQuestion(role) {
 //============================================================
 function debugOut(...str) {
   if (debug) {
-    console.log(...str);
+    console.log(chalk.grey(...str));
   }
 }
 
 //============================================================
 // [async] Get Employee Info via prompts
+// isManager : true if employee is a Manager
 //============================================================
-async function getEmployeeInfo() {
+async function getEmployeeInfo(isManager) {
+  
+  // Select the prompts to used based on Manager or non-Manager
+  let initialPrompt = isManager ? managerPrompt : employeePrompt;
+  
+  if (isManager) {
+    console.log(chalk.bgGreen.black("Project Manager Details"));
+  }
+
   try {
-    const responses = await inquirer.prompt(employeePrompt);
+    const responses = await inquirer.prompt(initialPrompt);
+    
+    // Don't prompt for type if we know it is a Manager
+    if (isManager) {
+      responses.type = "Manager";
+    }
+
     const questionsSpecial = getSpecialRoleQuestion(responses.type);
     const specialResponse = await inquirer.prompt(questionsSpecial);
 
@@ -239,7 +271,7 @@ async function generateTeamReport(team) {
 
     // Create the final HTML
     await writeFileAsync("./output/team.html", finalHtml);
-    console.log("\nReport Generated\n");
+    console.log(chalk.bold.green("\nReport Generated\n"));
   } catch (err) {
     console.log("generateTeamReport ERROR", err);
     throw err;
@@ -267,17 +299,18 @@ function updateTemplate(html, data) {
 
 //============================================================
 // [async] Add a Member to team array
+// isManager : true if new member is a manager
 // team : array of team member objects
 //============================================================
-async function addMember(team) {
+async function addMember(isManager, team) {
   try {
     // Prompt the user for employee info
-    const employeeData = await getEmployeeInfo();
+    const employeeData = await getEmployeeInfo(isManager);
     // Create an object to represent the employee
     const employee = createTeamMember(employeeData);
     // Add the new object to team array
     team.push(employee);
-    console.log("\nTeam Member Added\n");
+    console.log(chalk.bold.green("\nTeam Member Added\n"));
   } catch (err) {
     console.log("addMember ERROR", err);
     throw err;
@@ -298,6 +331,8 @@ async function init() {
     // Start the main loop
     debugOut("\nStarting the shell\n");
 
+    await addMember(true, team);
+
     do {
       // Prompt the user and save responses
       res = await inquirer.prompt(shellPrompt);
@@ -306,7 +341,7 @@ async function init() {
       switch (res.cmd) {
         // cmd = Add a New Team Member
         case ADD_MEMBER_STR:
-          await addMember(team);
+          await addMember(false, team);
           break;
 
         // cmd = Generate a Report

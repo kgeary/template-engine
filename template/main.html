@@ -12,10 +12,41 @@
     body {
       background-color: whitesmoke;
     }
+
+    footer {
+      text-align: center;
+    }
+
+    .Engineer {
+      background-color: rgb(201, 238, 250);
+    }
+
+    .Intern {
+      background-color: rgb(250, 219, 161);
+    }
+
+    .Manager {
+      background-color: rgb(184, 243, 184);
+    }
+
+    .card {
+      margin: 0 auto 1rem auto ;
+    }
+
+    .content {
+      margin: 0 auto;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+
   </style>
 </head>
 
-<body>
+<body id="top">
   <main class="container">
     <h1 class="title">Team Report</h1>
     <div class="card" style="width: 600px;">
@@ -47,9 +78,14 @@
       </div>
     </div>
     <hr>
-    {{ content }}
+    <div class="content">
+      {{ content }}
+    </div>
   </main>
-
+  <footer>
+    <p>End of Team Listing</p>
+    <p><a href="#top">Top of Page</a></p>
+  </footer>
 </body>
 
 </html>
