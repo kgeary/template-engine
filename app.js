@@ -80,22 +80,34 @@ const specialRoles = {
   },
 };
 
-
-//============================================================
-// Validate User Input for Employee Name
-// input : user input response (string)
-//============================================================
+/**
+  * Validate User Input for Employee Name
+  *
+  * @param input
+  * User Input for Employee Name to be validated
+  * 
+  * @returns
+  * String describing failure, or true if valid
+  */
 function validateName(input) {
   if (!input.match(/^[A-Z][A-Z ]{0,}/i)) {
-      // Name must contain at least 1 character and may contain only letters and spaces. 
+    // Name must contain at least 1 character and may contain only letters and spaces. 
   } else {
     return true;
   }
 }
 //============================================================
-// Validate User Input for Numeric Values
 // input : user input response (string)
 //============================================================
+/**
+  * Validate User Input for Numeric Values
+  *
+  * @param input
+  * User Input for an Integer Value to be validated
+  *
+  * @returns
+  * String describing failure, or true if valid
+  */
 function validateNumber(input) {
 
   if (!input.match(/^[0-9]+$/)) {
@@ -105,10 +117,15 @@ function validateNumber(input) {
   }
 }
 
-//============================================================
-// Validate User Input for Email Addresses
-// input : user input response (string)
-//============================================================
+/**
+  * Validate User Input for Email Address
+  *
+  * @param input
+  * User Input for an Email Address to be validated
+  * 
+  * @returns
+  * String describing failure, or true if valid
+  */
 function validateEmail(input) {
   if (!input.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
     return "Input must be a valid email address!";
@@ -117,10 +134,15 @@ function validateEmail(input) {
   }
 }
 
-//============================================================
-// Validate Github User Input
-// input : user input reponse (string)
-//============================================================
+/**
+  * Validate User Input for Github Profile Name
+  *
+  * @param input
+  * User Input for an Github Profile Name to be validated
+  * 
+  * @returns
+  * String describing failure, or true if valid
+  */
 function validateGithub(input) {
   if (!input.match(/^[A-Z0-9._%+-]{3,}$/i)) {
     return "Input must be a valid Github name!";
@@ -129,10 +151,15 @@ function validateGithub(input) {
   return true;
 }
 
-//============================================================
-// Lookup the special role question from the Employee Role
-// role : employee role (string)
-//============================================================
+/**
+  * Lookup the special role question from the Employee Role
+  *
+  * @param role
+  * Employee Role (string)
+  * 
+  * @returns 
+  * 1 question array for Prompts with a special for that role question
+  */
 function getSpecialRoleQuestion(role) {
   const specialRole = specialRoles[role];
   const msg = specialRole.special;
@@ -148,31 +175,38 @@ function getSpecialRoleQuestion(role) {
   ];
 }
 
-//============================================================
-// Output only if debugging
-//============================================================
+/**
+  * Debug Output. Only shows up if debug flag is enabled
+  *
+  * @param str
+  * What to display
+  */
 function debugOut(...str) {
   if (debug) {
     console.log(chalk.grey(...str));
   }
 }
 
-//============================================================
-// [async] Get Employee Info via prompts
-// isManager : true if employee is a Manager
-//============================================================
+/**
+  * @async Get Employee Info via prompts
+  *
+  * @param isManager
+  * true if employee is a Manager
+  * 
+  * @returns User input responses for a single employee
+  */
 async function getEmployeeInfo(isManager) {
-  
+
   // Select the prompts to used based on Manager or non-Manager
   let initialPrompt = isManager ? managerPrompt : employeePrompt;
-  
+
   if (isManager) {
     console.log(chalk.bgGreen.black("\nProject Manager Details\n"));
   }
 
   try {
     const responses = await inquirer.prompt(initialPrompt);
-    
+
     // Don't prompt for type if we know it is a Manager
     if (isManager) {
       responses.type = "Manager";
@@ -191,11 +225,14 @@ async function getEmployeeInfo(isManager) {
   }
 }
 
-//============================================================
-// Create and return a new employee object
-//   based on the data received from user.
-// input : User input reponse object with employee info data
-//============================================================
+/**
+  * Create and return a new employee object
+  *
+  * @param input
+  * User Input response object
+  * 
+  * @returns a new Employee object (Engineer, Inter, or Manager)
+  */
 function createTeamMember(input) {
   let employee;
 
@@ -217,11 +254,18 @@ function createTeamMember(input) {
   return employee;
 }
 
-//============================================================
-// [async] Generate report content for a single team member
-// employeeTemplate : generic employee html template string
-// member : the team member object to use to fill in template
-//============================================================
+/**
+  * @async Generate report content for a single team member
+  *
+  * @param employeeTemplate
+  * Generic Employee HTML template as a string.
+  * 
+  * @param member
+  * The team member object to pull the data from for templated fields in html.
+  * 
+  * @returns
+  * HTML with data filled-in for a single team member
+  */
 async function generateMemberReport(employeeTemplate, member) {
   try {
     // Update the template with general employee data
@@ -236,10 +280,12 @@ async function generateMemberReport(employeeTemplate, member) {
   }
 }
 
-//============================================================
-// [async] Generate report from team array
-// team : team member object array
-//============================================================
+/**
+  * @async Generate the final team report with all member data
+  *
+  * @param team
+  * Array of team members objects.
+  */
 async function generateTeamReport(team) {
   if (team.length < 1) {
     console.log("\nYou have no team members! Add Team Members first\n");
@@ -278,12 +324,18 @@ async function generateTeamReport(team) {
   }
 }
 
-//============================================================
-// Update HTML template file with fields in the data object
-// html : html template as a string
-// data : data object to get values from
-// returns an updated HTML string
-//============================================================
+/**
+  * Update HTML template file with fields in the data object
+  *
+  * @param html
+  * HTML template as a string.
+  * 
+  * @param data
+  * data object to get values from
+  * 
+  * @returns
+  * Updated HTML string with data fields substituted for templated fields
+  */
 function updateTemplate(html, data) {
   let result = html;
 
@@ -297,12 +349,16 @@ function updateTemplate(html, data) {
   return result;
 }
 
-//============================================================
-// [async] Add a Member to team array
-// isManager : true if new member is a manager
-// team : array of team member objects
-//============================================================
-async function addMember(isManager, team) {
+/**
+  * @async Add a team member to team array
+  *
+  * @param team
+  * Team member object array
+  * 
+  * @param isManager
+  * true if adding a Manager, false otherwise
+  */
+async function addTeamMember(team, isManager) {
   try {
     // Prompt the user for employee info
     const employeeData = await getEmployeeInfo(isManager);
@@ -317,21 +373,22 @@ async function addMember(isManager, team) {
   }
 }
 
-//============================================================
-// [async] Initialize and run the app. Generate a series of 
-//   prompts to allow the user to build a team and generate
-//   a HTML report of the team.
-//============================================================
+/**
+  * @async Initialize the application and run it. Generate a series of prompts
+  * to allow the user to construct a team and then generate an HTML report of
+  * the team.
+  */
 async function init() {
   const team = []; // Array to store team members
   let res;  // Hold the user reponses
-  let exitWhile = false;
+  let exitWhile = false; // Flag to tell us when to exit
 
   try {
     // Start the main loop
     debugOut("\nStarting the shell\n");
 
-    await addMember(true, team);
+    // Get the Manager Details
+    await addTeamMember(team, true);
 
     do {
       // Prompt the user and save responses
@@ -341,7 +398,7 @@ async function init() {
       switch (res.cmd) {
         // cmd = Add a New Team Member
         case ADD_MEMBER_STR:
-          await addMember(false, team);
+          await addTeamMember(team, false);
           break;
 
         // cmd = Generate a Report
@@ -373,5 +430,4 @@ async function init() {
 //============================================================
 // Kick off the application
 //============================================================
-
 init();
