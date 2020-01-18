@@ -21,7 +21,7 @@
       background-color: rgb(201, 238, 250);
     }
 
-    .Internm, .numInt {
+    .Intern, .numInt {
       background-color: rgb(250, 219, 161);
     }
 
@@ -74,9 +74,27 @@
       background-color: rgb(255, 255, 103);
     }
 
+    td a {
+      color: black;
+    }
+
     .text-name {
       text-transform: capitalize;
     }
+
+    /* For Print Format */
+    @media print {
+      .card {
+        width: 375px;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .container {
+        margin: 0;
+      }
+    }
+
   </style>
 </head>
 
