@@ -8,14 +8,49 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <title>Team Report</title>
+  <style>
+    body {
+      background-color: whitesmoke;
+    }
+  </style>
 </head>
 
 <body>
-  <h1 class="title">Team Report</h1>
   <main class="container">
+    <h1 class="title">Team Report</h1>
+    <div class="card" style="width: 600px;">
+      <div class="card-body">
+        <h3 class="card-title">Team Breakdown</h3>
+        <h5 class="card-title"># of Team Members: {{ teamSize }}</h5>
+        <table class="card-text table table-hover">
+          <thead class="thead-dark">
+            <tr>
+              <th>Role</th>
+              <th>Number</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Managers</td>
+              <td>{{ numManagers }}</td>
+            </tr>
+            <tr>
+              <td>Engineers</td>
+              <td>{{ numEngineers }}</td>
+            </tr>
+            <tr>
+              <td>Interns</td>
+              <td>{{ numInterns }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr>
     {{ content }}
   </main>
-  
+
 </body>
 
 </html>

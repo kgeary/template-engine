@@ -1,17 +1,21 @@
-<h3>{{ role }}</h3>
-<table class="table is-striped">
-  <tr>
-    <td>Name</td>
-    <td>{{ name }}</td>
-  </tr>
-  <tr>
-    <td>ID</td>
-    <td>{{ id }}</td>
-  </tr>
-  <tr>
-    <td>Email</td>
-    <td>{{ email }}</td>
-  </tr>
-  {{ special }}
-</table>
-  
+<div class="card" style="width: 600px;">
+  <div class="card-body">
+
+    <h3 class="card-title ">Employee {{ index }}: {{ role }}</h3>
+    <table class="card-text table table-striped">
+      <tr>
+        <td>Name</td>
+        <td>{{ name }}</td>
+      </tr>
+      <tr>
+        <td>ID</td>
+        <td>{{ id }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ email }}</td>
+      </tr>
+      {{ special }}
+    </table>
+  </div>
+</div>

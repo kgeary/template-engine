@@ -56,6 +56,7 @@ const specialRoles = [
     name: "Engineer",
     role: "Github Name",
     field: "github",
+    validate: validateGithub,
   },
   {
     name: "Manager",
@@ -70,21 +71,36 @@ const specialRoles = [
   },
 ];
 
+//=========================================
 // Validate Number Input
+//=========================================
 function validateNumber(input) {
 
   if (!input.match(/^[0-9]+$/)) {
-    return "Input must be a integer";
+    return "Input must be a integer!";
   };
 
   return true;
 }
 
+//=========================================
 // Validate Email Address Input
+//=========================================
 function validateEmail(input) {
   if (!input.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
-    return "Input must be a valid email address";
+    return "Input must be a valid email address!";
   };
+
+  return true;
+}
+
+//=========================================
+// Validate Github Input
+//=========================================
+function validateGithub(input) {
+  if (!input.match(/^[A-Z0-9._%+-]{3,}$/i)) {
+    return "Input must be a valid Github name!";
+  }
 
   return true;
 }
@@ -176,13 +192,26 @@ async function generateTeamReport(team) {
   let teamHtml = "";
   let employeeTemplate = await readFileAsync(`./template/employee.html`, "utf8");
   
+  // Generate the team portion of the HTML
   for (let memberIndex = 0; memberIndex < team.length; memberIndex++) {
-    const member = team[memberIndex];   
+    const member = team[memberIndex];
+    member.index = memberIndex + 1;
     teamHtml += await generateMemberReport(employeeTemplate, member);
   }
 
+  // Update the main template with team data
   let template = await readFileAsync(`./template/main.html`, "utf8");
-  let finalHtml = updateTemplate(template, {content: teamHtml});
+  let finalHtml = updateTemplate(template, 
+    {
+        content: teamHtml, 
+        teamSize: team.length,
+        numEngineers : team.filter(x => x.role === "Engineer").length,
+        numInterns : team.filter(x => x.role === "Intern").length,
+        numManagers : team.filter(x => x.role === "Manager").length,
+    }
+  );
+  
+  // Create the final HTML
   await writeFileAsync("./output/team.html", finalHtml);
 }
 
