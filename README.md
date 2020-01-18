@@ -16,5 +16,5 @@ node app.js
 
 The generated report will appear as 'team.html' in the 'output' folder
 
-## Screenshot
-TODO
+## Example
+<a href="./example/example.html" target="_blank">Example Team Report</a>
