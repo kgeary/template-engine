@@ -60,10 +60,19 @@
       box-shadow: rgba(128, 128, 128, 0.5) 10px 10px 10px;
     }
 
-    .summary td, .center {
+    .table-summary td,
+    .center {
       text-align: center;
     }
 
+    .table-employee td {
+      font-weight: bold;
+    }
+
+    .table-hover tr:hover td,
+    .table-hover tr:hover th {
+      background-color: rgb(255, 255, 103);
+    }
   </style>
 </head>
 
@@ -74,7 +83,7 @@
       <div class="card-body">
         <h3 class="card-title">Team Breakdown</h3>
         <h5 class="card-title">Total Team Members: {{ teamSize }}</h5>
-        <table class="card-text table summary table-hover">
+        <table class="card-text table table-summary table-hover">
           <thead class="thead-light">
             <tr>
               <th>Role</th>
