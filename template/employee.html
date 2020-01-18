@@ -1,24 +1,23 @@
 <div class="card {{ role }}">
   <div class="card-body">
-    <h3 class="card-title "><strong>{{ index }})</strong> {{ role }} - <strong>{{ name }}</strong></h3>
+    <h3 class="card-title text-name">{{ index }}) {{ name }}</h3>
+    <h5>{{ role }}</h5>
     <table class="card-text table table-employee table-striped table-hover">
-      <tr>
-        <th>Name</th>
-        <td>{{ name }}</td>
-      </tr>
-      <tr>
-        <th>Role</th>
-        <td>{{ role }}</td>
-      </tr>
-      <tr>
-        <th>ID</th>
-        <td>{{ id }}</td>
-      </tr>
-      <tr>
-        <th>Email</th>
-        <td>{{ email }}</td>
-      </tr>
-      {{ special }}
+      <tbody>
+        <tr>
+          <th>Name</th>
+          <td class="text-name">{{ name }}</td>
+        </tr>
+        <tr>
+          <th>ID</th>
+          <td>{{ id }}</td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td>{{ email }}</td>
+        </tr>
+        {{ special }}
+      </tbody>
     </table>
   </div>
 </div>

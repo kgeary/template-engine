@@ -17,15 +17,15 @@
       text-align: center;
     }
 
-    .Engineer {
+    .Engineer, .numEng {
       background-color: rgb(201, 238, 250);
     }
 
-    .Intern {
+    .Internm, .numInt {
       background-color: rgb(250, 219, 161);
     }
 
-    .Manager {
+    .Manager, .numMgr {
       background-color: rgb(184, 243, 184);
     }
 
@@ -69,9 +69,13 @@
       font-weight: bold;
     }
 
-    .table-hover tr:hover td,
-    .table-hover tr:hover th {
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
       background-color: rgb(255, 255, 103);
+    }
+
+    .text-name {
+      text-transform: capitalize;
     }
   </style>
 </head>
@@ -91,15 +95,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr class="numMgr">
               <th>Managers</th>
               <td>{{ numManagers }}</td>
             </tr>
-            <tr>
+            <tr class="numEng">
               <th>Engineers</th>
               <td>{{ numEngineers }}</td>
             </tr>
-            <tr>
+            <tr class="numInt">
               <th>Interns</th>
               <td>{{ numInterns }}</td>
             </tr>
