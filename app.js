@@ -201,7 +201,7 @@ async function getEmployeeInfo(isManager) {
   let initialPrompt = isManager ? managerPrompt : employeePrompt;
 
   if (isManager) {
-    console.log(chalk.bgGreen.black("\nProject Manager Details\n"));
+    console.log(chalk.bgGreen.black("\n Project Manager Details \n"));
   }
 
   try {
