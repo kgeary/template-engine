@@ -30,11 +30,22 @@
     }
 
     .card {
-      margin: 0 auto 1rem auto ;
+      margin: 1rem 1rem 2rem 1rem;
+      width: 500px;
+      box-shadow: rgba(128, 128, 128, 0.5) 10px 10px 10px;
+    }
+
+    .card-center {
+      margin: 0 auto;
+      width: 400px;
     }
 
     .content {
-      margin: 0 auto;
+      display: flex;
+      flex-grow: 0;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: space-around;
     }
 
     .title {
@@ -42,6 +53,15 @@
       margin-bottom: 1rem;
     }
 
+    .table {
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: rgba(128, 128, 128, 0.5) 10px 10px 10px;
+    }
+
+    .summary td, .center {
+      text-align: center;
+    }
 
   </style>
 </head>
@@ -49,28 +69,28 @@
 <body id="top">
   <main class="container">
     <h1 class="title">Team Report</h1>
-    <div class="card" style="width: 600px;">
+    <div class="card card-center">
       <div class="card-body">
         <h3 class="card-title">Team Breakdown</h3>
         <h5 class="card-title">Total Team Members: {{ teamSize }}</h5>
-        <table class="card-text table table-hover">
-          <thead class="thead-dark">
+        <table class="card-text table summary table-hover">
+          <thead class="thead-light">
             <tr>
               <th>Role</th>
-              <th>Number</th>
+              <th class="center">Number</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Managers</td>
+              <th>Managers</th>
               <td>{{ numManagers }}</td>
             </tr>
             <tr>
-              <td>Engineers</td>
+              <th>Engineers</th>
               <td>{{ numEngineers }}</td>
             </tr>
             <tr>
-              <td>Interns</td>
+              <th>Interns</th>
               <td>{{ numInterns }}</td>
             </tr>
           </tbody>
