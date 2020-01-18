@@ -119,7 +119,7 @@ function getSpecialRoleQuestion(type) {
       type: "input",
       message: msg,
       name: name,
-      validate: validate, 
+      validate: validate,
     }
   ];
 }
@@ -137,14 +137,19 @@ function debugOut(...str) {
 // [async] getEmployee data via prompts
 //=========================================
 async function getEmployeeInfo() {
-  const responses = await inquirer.prompt(employeePrompt);
-  const questionsSpecial = getSpecialRoleQuestion(responses.type);
-  const specialResponse = await inquirer.prompt(questionsSpecial);
+  try {
+    const responses = await inquirer.prompt(employeePrompt);
+    const questionsSpecial = getSpecialRoleQuestion(responses.type);
+    const specialResponse = await inquirer.prompt(questionsSpecial);
 
-  // Save the special role with the employee questions
-  const specialRole = Object.keys(specialResponse)[0];
-  responses[specialRole] = specialResponse[specialRole];
-  return responses;
+    // Save the special role with the employee questions
+    const specialRole = Object.keys(specialResponse)[0];
+    responses[specialRole] = specialResponse[specialRole];
+    return responses;
+  } catch (err) {
+    console.log("getEmployeeInfo Error", err);
+    throw err;
+  }
 }
 
 //=========================================
@@ -177,58 +182,76 @@ function createTeamMember(data) {
 // single team member
 //=========================================
 async function generateMemberReport(employeeTemplate, member) {
-  // Update the template with general employee data
-  let employeeContent = updateTemplate(employeeTemplate, member);
-  // Also update the template with role specific data
-  let specialFile = `./template/${member.role.toLowerCase()}.html`;
-  let specialTemplate = await readFileAsync(specialFile, "utf8");
-  return updateTemplate(employeeContent, { special: updateTemplate(specialTemplate, member) });
+  try {
+    // Update the template with general employee data
+    let employeeContent = updateTemplate(employeeTemplate, member);
+    // Also update the template with role specific data
+    let specialFile = `./template/${member.role.toLowerCase()}.html`;
+    let specialTemplate = await readFileAsync(specialFile, "utf8");
+    return updateTemplate(employeeContent, { special: updateTemplate(specialTemplate, member) });
+  } catch (err) {
+    console.log("generateMemberReport ERROR", err);
+    throw err;
+  }
 }
 
 //=========================================
 // [async] Generate report from team array
 //=========================================
 async function generateTeamReport(team) {
-  let teamHtml = "";
-  let employeeTemplate = await readFileAsync(`./template/employee.html`, "utf8");
   
-  // Generate the team portion of the HTML
-  for (let memberIndex = 0; memberIndex < team.length; memberIndex++) {
-    const member = team[memberIndex];
-    member.index = memberIndex + 1;
-    teamHtml += await generateMemberReport(employeeTemplate, member);
-  }
-
-  // Update the main template with team data
-  let template = await readFileAsync(`./template/main.html`, "utf8");
-  let finalHtml = updateTemplate(template, 
-    {
-        content: teamHtml, 
-        teamSize: team.length,
-        numEngineers : team.filter(x => x.role === "Engineer").length,
-        numInterns : team.filter(x => x.role === "Intern").length,
-        numManagers : team.filter(x => x.role === "Manager").length,
+  try {
+    let teamHtml = "";
+    let employeeTemplate = await readFileAsync(`./template/employee.html`, "utf8");
+  
+    // Generate the team portion of the HTML
+    for (let memberIndex = 0; memberIndex < team.length; memberIndex++) {
+      const member = team[memberIndex];
+      member.index = memberIndex + 1;
+      teamHtml += await generateMemberReport(employeeTemplate, member);
     }
-  );
   
-  // Create the final HTML
-  await writeFileAsync("./output/team.html", finalHtml);
+    // Update the main template with team data
+    let template = await readFileAsync(`./template/main.html`, "utf8");
+    let finalHtml = updateTemplate(template,
+      {
+        content: teamHtml,
+        teamSize: team.length,
+        numEngineers: team.filter(x => x.role === "Engineer").length,
+        numInterns: team.filter(x => x.role === "Intern").length,
+        numManagers: team.filter(x => x.role === "Manager").length,
+      }
+    );
+  
+    // Create the final HTML
+    await writeFileAsync("./output/team.html", finalHtml);
+  } catch (err) {
+    console.log("generateTeamReport ERROR", err);
+    throw err;
+  }
 }
 
 //=========================================
 // Update HTML template file with fields in
 // the data object
+// html = html template as a string
+// data = data object to get values from
+// returns an updated HTML string
 //=========================================
 function updateTemplate(html, data) {
   let result = html;
 
   // Try to find each key in data in the template
   // If you find it replace it with the value from the data object
-  for (let key of Object.keys(data)) {
-    var re = new RegExp(`{{ (${key}) }}`);
+  console.log(data);
+
+  // For each available key in the data object
+  for (let key in data) {
+    // Use regex to replace {{ key }} with data[key] (global search)
+    const re = new RegExp(`{{ (${key}) }}`, "g");
     result = result.replace(re, data[key]);
   }
-  
+
   return result;
 }
 
@@ -239,45 +262,52 @@ function updateTemplate(html, data) {
 // a HTML report of the team
 //=========================================
 async function init() {
-
   const team = []; // Array to store team members
   let res;  // Hold the user reponses
   let exitWhile = false;
 
-  debugOut("\nStarting the shell\n");
-  do {
-    // Prompt the user and save responses
-    res = await inquirer.prompt(shellPrompt);
+  try {
+    // Start the main loop
+    debugOut("\nStarting the shell\n");
+    do {
+      // Prompt the user and save responses
+      res = await inquirer.prompt(shellPrompt);
 
-    switch (res.cmd) {
-      // Add a New Team Member
-      case ADD_MEMBER_STR:
-        const employeeData = await getEmployeeInfo();
-        const employee = createTeamMember(employeeData);
-        team.push(employee);
-        break;
-      
-        // Generate a Report
-      case GENERATE_REPORT_STR:
-        if (team.length < 1) {
-          console.log("\nYou have no team members! Add Team Members first\n");
-        } else {
-          await generateTeamReport(team);
-          console.log("\nReport Generated\n"); 
-        }
-        break;
+      // Check which command was entered
+      switch (res.cmd) {
+        // cmd = Add a New Team Member
+        case ADD_MEMBER_STR:
+          const employeeData = await getEmployeeInfo();
+          const employee = createTeamMember(employeeData);
+          team.push(employee);
+          break;
 
-      // Quit
-      case QUIT_STR:
-        exitWhile = true; // Break the while
-        break;
+        // cmd = Generate a Report
+        case GENERATE_REPORT_STR:
+          if (team.length < 1) {
+            console.log("\nYou have no team members! Add Team Members first\n");
+          } else {
+            await generateTeamReport(team);
+            console.log("\nReport Generated\n");
+          }
+          break;
 
-      default:
-        console.log("\nUnknown Command\n");
-        break;
-    }
-  } while (!exitWhile)
-  debugOut("\nEnding the shell\n");
+        // cmd = Quit
+        case QUIT_STR:
+          exitWhile = true; // Break the while
+          break;
+        // cmd = unknown command (Should not happen)
+        default:
+          console.log("\nUnknown Command\n");
+          break;
+      }
+      // Remain in this loop until the user tells us to quit
+    } while (!exitWhile)
+    debugOut("\nEnding the shell\n");
+  } catch (err) {
+    // Oh shit
+    console.log("ERROR", err);
+  }
 }
 
 //=========================================
