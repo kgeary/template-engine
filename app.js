@@ -129,8 +129,10 @@ async function generateReport(team) {
   let teamHtml = "";
   for (let memberIndex = 0; memberIndex < team.length; memberIndex++) {
     const member = team[memberIndex];   
-    let template = await readFileAsync(`./template/${member.role.toLowerCase()}.html`, "utf8");
-    teamHtml += updateTemplate(template, member);
+    let template1 = await readFileAsync(`./template/employee.html`, "utf8");
+    let template2 = await readFileAsync(`./template/${member.role.toLowerCase()}.html`, "utf8");
+    let partial = updateTemplate(template1, member);
+    teamHtml += updateTemplate(partial, { special: updateTemplate(template2, member) });
   }
 
   let template = await readFileAsync(`./template/main.html`, "utf8");
@@ -140,18 +142,14 @@ async function generateReport(team) {
 
 function updateTemplate(html, data) {
   do {
-    const startIndex = html.indexOf("{{");
-    const endIndex = html.indexOf("}}");
-    if (startIndex === -1) {
-      break;
-    }
-    
-    // If it matches a field in the data update the code
-    let field = html.substring(startIndex+2, endIndex).trim();
+    let match = html.match(/{{ (\w*) }}/);
+    if (!match) { break; }
+    let field = match[1];
     if (data[field]) {
-      html = html.substring(0, startIndex) + data[field] + html.substring(endIndex+2);
+      html = html.replace(/{{ \w* }}/, data[field]);
+    } else {
+      break; // TODO - fix this
     }
-
   } while (true);
 
   return html;
@@ -182,7 +180,7 @@ async function init() {
         if (team.length < 1) {
           console.log("You have no team members! Add Team Members first");
         }
-        generateReport(team);
+        await generateReport(team);
         console.log("Report Generated");
         break;
 
