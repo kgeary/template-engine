@@ -33,7 +33,7 @@ const employeePrompt = [
   {
     type: "list",
     message: "Select an employee type",
-    name: "type",
+    name: "role",
     choices: ["Engineer", "Intern"],
   },
   {
@@ -56,7 +56,7 @@ const employeePrompt = [
   },
 ];
 
-// Manager Prompt (Skip the select employee type question)
+// Manager Prompt (Skip the select employee role question)
 const managerPrompt = employeePrompt.slice(1);
 
 // For specifying the special role
@@ -156,7 +156,7 @@ function validateGithub(input) {
   *
   * @param role
   * Employee Role (string)
-  * 
+* 
   * @returns 
   * 1 question array for Prompts with a special for that role question
   */
@@ -188,6 +188,26 @@ function debugOut(...str) {
 }
 
 /**
+  * Error Output. Add formatting to error messages
+  *
+  * @param str
+  * What to display
+  */
+function errorOut(...str) {
+  console.log(chalk.bold.red(...str));
+}
+
+/**
+  * Success Output. Add formatting to output messages
+  *
+  * @param str
+  * What to display
+  */
+function successOut(...str) {
+  console.log(chalk.bold.green(...str));
+}
+
+/**
   * @async Get Employee Info via prompts
   *
   * @param isManager
@@ -207,12 +227,13 @@ async function getEmployeeInfo(isManager) {
   try {
     const responses = await inquirer.prompt(initialPrompt);
 
-    // Don't prompt for type if we know it is a Manager
+    // Don't prompt for role if we know it is a Manager
     if (isManager) {
-      responses.type = "Manager";
+      responses.role = "Manager";
     }
 
-    const questionsSpecial = getSpecialRoleQuestion(responses.type);
+    // Get the special question specific to the reole
+    const questionsSpecial = getSpecialRoleQuestion(responses.role);
     const specialResponse = await inquirer.prompt(questionsSpecial);
 
     // Save the special role with the employee questions
@@ -220,23 +241,23 @@ async function getEmployeeInfo(isManager) {
     responses[specialRole] = specialResponse[specialRole];
     return responses;
   } catch (err) {
-    console.log("getEmployeeInfo Error", err);
+    errorOut("getEmployeeInfo Error", err);
     throw err;
   }
 }
 
 /**
-  * Create and return a new employee object
+  * Create and return a new team member object
   *
   * @param input
-  * User Input response object
+  * User Input response object with Employee Info responses
   * 
-  * @returns a new Employee object (Engineer, Inter, or Manager)
+  * @returns a new Employee object (Engineer, Intern, or Manager)
   */
 function createTeamMember(input) {
   let employee;
 
-  switch (input.type) {
+  switch (input.role) {
     case "Engineer":
       employee = new Engineer(input.name, input.id, input.email, input.github);
       break;
@@ -247,7 +268,7 @@ function createTeamMember(input) {
       employee = new Manager(input.name, input.id, input.email, input.officeNumber);
       break;
     default:
-      console.log("\nUnknown Employee Type\n");
+      errorOut("\nUnknown Employee Role\n");
       break;
   }
 
@@ -273,9 +294,10 @@ async function generateMemberReport(employeeTemplate, member) {
     // Also update the template with role specific data
     let specialFile = `./template/${member.role.toLowerCase()}.html`;
     let specialTemplate = await readFileAsync(specialFile, "utf8");
-    return updateTemplate(employeeContent, { special: updateTemplate(specialTemplate, member) });
+    let specialHtml = updateTemplate(specialTemplate, member);
+    return updateTemplate(employeeContent, { special: specialHtml });
   } catch (err) {
-    console.log("generateMemberReport ERROR", err);
+    errorOut("generateMemberReport ERROR", err);
     throw err;
   }
 }
@@ -288,7 +310,7 @@ async function generateMemberReport(employeeTemplate, member) {
   */
 async function generateTeamReport(team) {
   if (team.length < 1) {
-    console.log("\nYou have no team members! Add Team Members first\n");
+    errorOut("\nYou have no team members! Add Team Members first\n");
     return;
   }
 
@@ -317,9 +339,9 @@ async function generateTeamReport(team) {
 
     // Create the final HTML
     await writeFileAsync("./output/team.html", finalHtml);
-    console.log(chalk.bold.green("\nReport Generated\n"));
+    successOut("\nReport Generated\n");
   } catch (err) {
-    console.log("generateTeamReport ERROR", err);
+    errorOut("generateTeamReport ERROR", err);
     throw err;
   }
 }
@@ -366,9 +388,9 @@ async function addTeamMember(team, isManager) {
     const employee = createTeamMember(employeeData);
     // Add the new object to team array
     team.push(employee);
-    console.log(chalk.bold.green("\nTeam Member Added\n"));
+    successOut("\nTeam Member Added\n");
   } catch (err) {
-    console.log("addMember ERROR", err);
+    errorOut("addMember ERROR", err);
     throw err;
   }
 }
@@ -413,7 +435,7 @@ async function init() {
 
         // cmd = unknown command (Should not happen)
         default:
-          console.log("\nUnknown Command\n");
+          errorOut("\nUnknown Command\n");
           break;
       }
       // Remain in this loop until the user tells us to quit
@@ -423,7 +445,7 @@ async function init() {
 
   } catch (err) {
     // Oh shit
-    console.log("ERROR", err);
+    errorOut("ERROR", err);
   }
 }
 
