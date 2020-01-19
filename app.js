@@ -144,7 +144,7 @@ function validateEmail(input) {
   * String describing failure, or true if valid
   */
 function validateGithub(input) {
-  if (!input.match(/^[A-Z0-9._%+-]{3,}$/i)) {
+  if (!input.match(/^[A-Z0-9_]{3,}$/i)) {
     return "Input must be a valid Github name!";
   }
 
@@ -238,6 +238,7 @@ async function getEmployeeInfo(isManager) {
 
     // Save the special role with the employee questions
     const specialRole = Object.keys(specialResponse)[0];
+    // Add the special response to our initial responses object
     responses[specialRole] = specialResponse[specialRole];
     return responses;
   } catch (err) {
@@ -295,6 +296,7 @@ async function generateMemberReport(employeeTemplate, member) {
     let specialFile = `./template/${member.role.toLowerCase()}.html`;
     let specialTemplate = await readFileAsync(specialFile, "utf8");
     let specialHtml = updateTemplate(specialTemplate, member);
+    // Add the role specific question into the template
     return updateTemplate(employeeContent, { special: specialHtml });
   } catch (err) {
     errorOut("generateMemberReport ERROR", err);
@@ -442,7 +444,6 @@ async function init() {
     } while (!exitWhile)
     // Out of main loop - exit
     debugOut("\nEnding the shell\n");
-
   } catch (err) {
     // Oh shit
     errorOut("ERROR", err);
