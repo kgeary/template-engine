@@ -380,6 +380,13 @@ async function generateTeamReport(team) {
 function updateTemplate(html, data) {
   let result = html;
 
+  // Replace Methods
+  const methods = getMethods(data);
+  for (let key of methods) {
+    let re = new RegExp(`{{ ${key}\\(\\) }}`, "g");
+    result = result.replace(re, data[key]());
+  }
+  // Replace Properties
   // For each available key in the data object
   for (let key in data) {
     // Use regex to replace {{ key }} with data[key] (global search)
@@ -389,6 +396,36 @@ function updateTemplate(html, data) {
 
   return result;
 }
+
+/**
+  * Get the Methods associated with an object (not including Object's methods)
+  *
+  * @param obj
+  * An object to get all methods from
+  * 
+  * @returns
+  * Array of method names
+  */
+function getMethods(obj) {
+  let methods = [];
+  let cls;
+
+  do {
+    cls = Object.getPrototypeOf(obj);
+    if (!Object.getPrototypeOf(cls)) { 
+      // Break the loop once we hit object
+      break; 
+    }
+    Object.getOwnPropertyNames(cls)
+      .filter(i => i !== "constructor")
+      .map(i => methods.push(i));
+
+    obj = cls;
+  } while (true);
+
+  return methods;
+}
+
 
 /**
   * @async Add a team member to team array

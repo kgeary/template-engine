@@ -1,20 +1,20 @@
-<div class="card {{ role }}">
+<div class="card {{ getRole() }}">
   <div class="card-body">
-    <h3 class="card-title text-name">{{ index }}) {{ name }}</h3>
-    <h5>{{ role }}</h5>
+    <h3 class="card-title text-name">{{ index }}) {{ getName() }}</h3>
+    <h5>{{ getRole() }}</h5>
     <table class="card-text table table-employee table-striped table-hover">
       <tbody>
         <tr>
           <th>Name</th>
-          <td class="text-name">{{ name }}</td>
+          <td class="text-name">{{ getName() }}</td>
         </tr>
         <tr>
           <th>ID</th>
-          <td>{{ id }}</td>
+          <td>{{ getId() }}</td>
         </tr>
         <tr>
           <th>Email</th>
-          <td><a href="mailto:{{ email }}">{{ email }}</a></td>
+          <td><a href="mailto:{{ email }}">{{ getEmail() }}</a></td>
         </tr>
         {{ special }}
       </tbody>
