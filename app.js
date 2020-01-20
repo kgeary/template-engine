@@ -1,17 +1,10 @@
-const fs = require("fs");
-const util = require("util");
 const inquirer = require("inquirer");
-const chalk = require('chalk')
 const Engineer = require("./lib/engineer");
 const Intern = require("./lib/intern");
 const Manager = require("./lib/manager");
-
-// Promisified Functions
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
-
-// Enable debugging via cmd line args
-const debug = process.argv[2] === "debug";
+const validate = require("./validate");
+const out = require("./out");
+const report = require("./report");
 
 // MAIN MENU COMMAND OPTIONS
 const ADD_MEMBER_STR = "ADD Member";
@@ -40,19 +33,19 @@ const employeePrompt = [
     type: "input",
     message: "Employee Name",
     name: "name",
-    validate: validateName,
+    validate: validate.name,
   },
   {
     type: "input",
     message: "Employee ID",
     name: "id",
-    validate: validateNumber,
+    validate: validate.int,
   },
   {
     type: "input",
     message: "Employee Email",
     name: "email",
-    validate: validateEmail,
+    validate: validate.email,
   },
 ];
 
@@ -65,13 +58,13 @@ const specialRoles = {
     role: "Engineer",
     special: "Github Name",
     field: "github",
-    validate: validateGithub,
+    validate: validate.github,
   },
   Manager: {
     role: "Manager",
     special: "Office Number",
     field: "officeNumber",
-    validate: validateNumber,
+    validate: validate.int,
   },
   Intern: {
     role: "Intern",
@@ -80,76 +73,10 @@ const specialRoles = {
   },
 };
 
-/**
-  * Validate User Input for Employee Name
-  *
-  * @param input
-  * User Input for Employee Name to be validated
-  * 
-  * @returns
-  * String describing failure, or true if valid
-  */
-function validateName(input) {
-  if (!input.match(/^[A-Z][A-Z ]{0,}/i)) {
-    // Name must contain at least 1 character and may contain only letters and spaces. 
-  } else {
-    return true;
-  }
-}
+
 //============================================================
 // input : user input response (string)
 //============================================================
-/**
-  * Validate User Input for Numeric Values
-  *
-  * @param input
-  * User Input for an Integer Value to be validated
-  *
-  * @returns
-  * String describing failure, or true if valid
-  */
-function validateNumber(input) {
-
-  if (!input.match(/^[0-9]+$/)) {
-    return "Input must be a integer!";
-  } else {
-    return true;
-  }
-}
-
-/**
-  * Validate User Input for Email Address
-  *
-  * @param input
-  * User Input for an Email Address to be validated
-  * 
-  * @returns
-  * String describing failure, or true if valid
-  */
-function validateEmail(input) {
-  if (!input.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
-    return "Input must be a valid email address!";
-  } else {
-    return true;
-  }
-}
-
-/**
-  * Validate User Input for Github Profile Name
-  *
-  * @param input
-  * User Input for an Github Profile Name to be validated
-  * 
-  * @returns
-  * String describing failure, or true if valid
-  */
-function validateGithub(input) {
-  if (!input.match(/^[A-Z0-9_]{3,}$/i)) {
-    return "Input must be a valid Github name!";
-  }
-
-  return true;
-}
 
 /**
   * Lookup the special role question from the Employee Role
@@ -164,58 +91,15 @@ function getSpecialRoleQuestion(role) {
   const specialRole = specialRoles[role];
   const msg = specialRole.special;
   const name = specialRole.field;
-  const validate = specialRole.validate;
+  const val = specialRole.validate;
   return [
     {
       type: "input",
       message: msg,
       name: name,
-      validate: validate,
+      validate: val,
     }
   ];
-}
-
-/**
-  * Debug Output. Only shows up if debug flag is enabled
-  *
-  * @param str
-  * What to display
-  */
-function debugOut(...str) {
-  if (debug) {
-    console.log(chalk.grey(...str));
-  }
-}
-
-/**
-  * Error Output. Add formatting to error messages
-  *
-  * @param str
-  * What to display
-  */
-function errorOut(...str) {
-  console.log(chalk.bold.red(...str));
-}
-
-/**
-  * Success Output. Add formatting to output messages
-  *
-  * @param str
-  * What to display
-  */
-function successOut(...str) {
-  console.log(chalk.bold.green(...str));
-}
-
-/**
-  * Heading Output. Green Background with Black Text
-  *
-  * @param str
-  * What to display
-  */
-
-function headingOut(...str) {
-  console.log(chalk.bgGreen.black(...str));
 }
 
 /**
@@ -232,7 +116,7 @@ async function getEmployeeInfo(isManager) {
   let initialPrompt = isManager ? managerPrompt : employeePrompt;
 
   if (isManager) {
-    headingOut("\n Project Manager Details \n");
+    out.heading("\n Project Manager Details \n");
   }
 
   try {
@@ -253,7 +137,7 @@ async function getEmployeeInfo(isManager) {
     responses[specialRole] = specialResponse[specialRole];
     return responses;
   } catch (err) {
-    errorOut("getEmployeeInfo Error", err);
+    out.error("getEmployeeInfo Error", err);
     throw err;
   }
 }
@@ -280,150 +164,11 @@ function createTeamMember(input) {
       employee = new Manager(input.name, input.id, input.email, input.officeNumber);
       break;
     default:
-      errorOut("\nUnknown Employee Role\n");
+      out.error("\nUnknown Employee Role\n");
       break;
   }
 
   return employee;
-}
-
-/**
-  * @async Generate report content for a single team member
-  *
-  * @param employeeTemplate
-  * Generic Employee HTML template as a string.
-  * 
-  * @param member
-  * The team member object to pull the data from for templated fields in html.
-  * 
-  * @returns
-  * HTML with data filled-in for a single team member
-  */
-async function generateMemberReport(employeeTemplate, member) {
-  try {
-    // Update the employee template with member data
-    let employeeContent = updateTemplate(employeeTemplate, member);
-    
-    // Get a path to the special template for the member's role
-    let specialFile = `./template/${member.role.toLowerCase()}.html`;
-    
-    // Read the template into a string
-    let specialTemplate = await readFileAsync(specialFile, "utf8");
-    
-    // Update the special template with member data
-    let specialHtml = updateTemplate(specialTemplate, member);
-    
-    // Add the updated special role template into the employee template
-    return updateTemplate(employeeContent, { special: specialHtml });
-  } catch (err) {
-    errorOut("generateMemberReport ERROR", err);
-    throw err;
-  }
-}
-
-/**
-  * @async Generate the final team report with all member data
-  *
-  * @param team
-  * Array of team members objects.
-  */
-async function generateTeamReport(team) {
-  if (team.length < 1) {
-    errorOut("\nYou have no team members! Add Team Members first\n");
-    return;
-  }
-
-  try {
-    let teamHtml = "";
-    let employeeTemplate = await readFileAsync(`./template/employee.html`, "utf8");
-
-    // Generate the team portion of the HTML
-    for (let memberIndex = 0; memberIndex < team.length; memberIndex++) {
-      const member = team[memberIndex];
-      member.index = memberIndex + 1;
-      teamHtml += await generateMemberReport(employeeTemplate, member);
-    }
-
-    // Update the main template with team data
-    let template = await readFileAsync(`./template/main.html`, "utf8");
-    let finalHtml = updateTemplate(template,
-      {
-        content: teamHtml,
-        teamSize: team.length,
-        numEngineers: team.filter(x => x.role === "Engineer").length,
-        numInterns: team.filter(x => x.role === "Intern").length,
-        numManagers: team.filter(x => x.role === "Manager").length,
-      }
-    );
-
-    // Create the final HTML
-    await writeFileAsync("./output/team.html", finalHtml);
-    successOut("\nReport Generated\n");
-  } catch (err) {
-    errorOut("generateTeamReport ERROR", err);
-    throw err;
-  }
-}
-
-/**
-  * Update HTML template file with fields in the data object
-  *
-  * @param html
-  * HTML template as a string.
-  * 
-  * @param data
-  * data object to get values from
-  * 
-  * @returns
-  * Updated HTML string with data fields substituted for templated fields
-  */
-function updateTemplate(html, data) {
-  let result = html;
-
-  // Replace Methods
-  const methods = getMethods(data);
-  for (let key of methods) {
-    let re = new RegExp(`{{ ${key}\\(\\) }}`, "g");
-    result = result.replace(re, data[key]());
-  }
-  // Replace Properties
-  // For each available key in the data object
-  for (let key in data) {
-    // Use regex to replace {{ key }} with data[key] (global search)
-    const re = new RegExp(`{{ (${key}) }}`, "g");
-    result = result.replace(re, data[key]);
-  }
-
-  return result;
-}
-
-/**
-  * Get the Methods associated with an object (not including Object's methods)
-  *
-  * @param obj
-  * An object to get all methods from
-  * 
-  * @returns
-  * Array of method names
-  */
-function getMethods(obj) {
-  let methods = [];
-  let cls;
-
-  do {
-    cls = Object.getPrototypeOf(obj);
-    if (!Object.getPrototypeOf(cls)) { 
-      // Break the loop once we hit object
-      break; 
-    }
-    Object.getOwnPropertyNames(cls)
-      .filter(i => i !== "constructor")
-      .map(i => methods.push(i));
-
-    obj = cls;
-  } while (true);
-
-  return methods;
 }
 
 
@@ -444,9 +189,9 @@ async function addTeamMember(team, isManager) {
     const employee = createTeamMember(employeeData);
     // Add the new object to team array
     team.push(employee);
-    successOut("\nTeam Member Added\n");
+    out.success("\nTeam Member Added\n");
   } catch (err) {
-    errorOut("addMember ERROR", err);
+    out.error("addMember ERROR", err);
     throw err;
   }
 }
@@ -463,7 +208,7 @@ async function init() {
 
   try {
     // Start the main loop
-    debugOut("\nStarting the shell\n");
+    out.debug("\nStarting the shell\n");
 
     // Get the Manager Details
     await addTeamMember(team, true);
@@ -481,7 +226,7 @@ async function init() {
 
         // cmd = Generate a Report
         case GENERATE_REPORT_STR:
-          await generateTeamReport(team);
+          await report.generate(team);
           break;
 
         // cmd = Quit
@@ -491,16 +236,16 @@ async function init() {
 
         // cmd = unknown command (Should not happen)
         default:
-          errorOut("\nUnknown Command\n");
+          out.error("\nUnknown Command\n");
           break;
       }
       // Remain in this loop until the user tells us to quit
     } while (!exitWhile)
     // Out of main loop - exit
-    debugOut("\nEnding the shell\n");
+    out.debug("\nEnding the shell\n");
   } catch (err) {
     // Oh shit
-    errorOut("ERROR", err);
+    out.error("ERROR", err);
   }
 }
 
