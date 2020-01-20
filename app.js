@@ -208,6 +208,17 @@ function successOut(...str) {
 }
 
 /**
+  * Heading Output. Green Background with Black Text
+  *
+  * @param str
+  * What to display
+  */
+
+function headingOut(...str) {
+  console.log(chalk.bgGreen.black(...str));
+}
+
+/**
   * @async Get Employee Info via prompts
   *
   * @param isManager
@@ -221,7 +232,7 @@ async function getEmployeeInfo(isManager) {
   let initialPrompt = isManager ? managerPrompt : employeePrompt;
 
   if (isManager) {
-    console.log(chalk.bgGreen.black("\n Project Manager Details \n"));
+    headingOut("\n Project Manager Details \n");
   }
 
   try {
@@ -290,13 +301,19 @@ function createTeamMember(input) {
   */
 async function generateMemberReport(employeeTemplate, member) {
   try {
-    // Update the template with general employee data
+    // Update the employee template with member data
     let employeeContent = updateTemplate(employeeTemplate, member);
-    // Also update the template with role specific data
+    
+    // Get a path to the special template for the member's role
     let specialFile = `./template/${member.role.toLowerCase()}.html`;
+    
+    // Read the template into a string
     let specialTemplate = await readFileAsync(specialFile, "utf8");
+    
+    // Update the special template with member data
     let specialHtml = updateTemplate(specialTemplate, member);
-    // Add the role specific question into the template
+    
+    // Add the updated special role template into the employee template
     return updateTemplate(employeeContent, { special: specialHtml });
   } catch (err) {
     errorOut("generateMemberReport ERROR", err);
