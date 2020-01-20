@@ -2,9 +2,9 @@ const inquirer = require("inquirer");
 const Engineer = require("./lib/engineer");
 const Intern = require("./lib/intern");
 const Manager = require("./lib/manager");
-const validate = require("./validate");
-const out = require("./out");
-const report = require("./report");
+const validate = require("./lib/validate");
+const out = require("./lib/out");
+const report = require("./lib/report");
 
 // MAIN MENU COMMAND OPTIONS
 const ADD_MEMBER_STR = "ADD Member";
@@ -17,7 +17,7 @@ const shellPrompt = [
     type: "list",
     message: "What would you like to do?",
     name: "cmd",
-    choices: [ADD_MEMBER_STR, GENERATE_REPORT_STR, QUIT_STR],
+    choices: [ADD_MEMBER_STR, GENERATE_REPORT_STR, QUIT_STR]
   }
 ];
 
@@ -27,26 +27,26 @@ const employeePrompt = [
     type: "list",
     message: "Select an employee type",
     name: "role",
-    choices: ["Engineer", "Intern"],
+    choices: ["Engineer", "Intern"]
   },
   {
     type: "input",
     message: "Employee Name",
     name: "name",
-    validate: validate.name,
+    validate: validate.name
   },
   {
     type: "input",
     message: "Employee ID",
     name: "id",
-    validate: validate.int,
+    validate: validate.int
   },
   {
     type: "input",
     message: "Employee Email",
     name: "email",
-    validate: validate.email,
-  },
+    validate: validate.email
+  }
 ];
 
 // Manager Prompt (Skip the select employee role question)
@@ -58,35 +58,30 @@ const specialRoles = {
     role: "Engineer",
     special: "Github Name",
     field: "github",
-    validate: validate.github,
+    validate: validate.github
   },
   Manager: {
     role: "Manager",
     special: "Office Number",
     field: "officeNumber",
-    validate: validate.int,
+    validate: validate.int
   },
   Intern: {
     role: "Intern",
     special: "School",
-    field: "school",
-  },
+    field: "school"
+  }
 };
 
-
-//============================================================
-// input : user input response (string)
-//============================================================
-
 /**
-  * Lookup the special role question from the Employee Role
-  *
-  * @param role
-  * Employee Role (string)
-* 
-  * @returns 
-  * 1 question array for Prompts with a special for that role question
-  */
+ * Lookup the special role question from the Employee Role
+ *
+ * @param role
+ * Employee Role (string)
+ *
+ * @returns
+ * 1 question array for Prompts with a special for that role question
+ */
 function getSpecialRoleQuestion(role) {
   const specialRole = specialRoles[role];
   const msg = specialRole.special;
@@ -97,21 +92,20 @@ function getSpecialRoleQuestion(role) {
       type: "input",
       message: msg,
       name: name,
-      validate: val,
+      validate: val
     }
   ];
 }
 
 /**
-  * @async Get Employee Info via prompts
-  *
-  * @param isManager
-  * true if employee is a Manager
-  * 
-  * @returns User input responses for a single employee
-  */
+ * @async Get Employee Info via prompts
+ *
+ * @param isManager
+ * true if employee is a Manager
+ *
+ * @returns User input responses for a single employee
+ */
 async function getEmployeeInfo(isManager) {
-
   // Select the prompts to used based on Manager or non-Manager
   let initialPrompt = isManager ? managerPrompt : employeePrompt;
 
@@ -143,13 +137,13 @@ async function getEmployeeInfo(isManager) {
 }
 
 /**
-  * Create and return a new team member object
-  *
-  * @param input
-  * User Input response object with Employee Info responses
-  * 
-  * @returns a new Employee object (Engineer, Intern, or Manager)
-  */
+ * Create and return a new team member object
+ *
+ * @param input
+ * User Input response object with Employee Info responses
+ *
+ * @returns a new Employee object (Engineer, Intern, or Manager)
+ */
 function createTeamMember(input) {
   let employee;
 
@@ -161,7 +155,12 @@ function createTeamMember(input) {
       employee = new Intern(input.name, input.id, input.email, input.school);
       break;
     case "Manager":
-      employee = new Manager(input.name, input.id, input.email, input.officeNumber);
+      employee = new Manager(
+        input.name,
+        input.id,
+        input.email,
+        input.officeNumber
+      );
       break;
     default:
       out.error("\nUnknown Employee Role\n");
@@ -171,16 +170,15 @@ function createTeamMember(input) {
   return employee;
 }
 
-
 /**
-  * @async Add a team member to team array
-  *
-  * @param team
-  * Team member object array
-  * 
-  * @param isManager
-  * true if adding a Manager, false otherwise
-  */
+ * @async Add a team member to team array
+ *
+ * @param team
+ * Team member object array
+ *
+ * @param isManager
+ * true if adding a Manager, false otherwise
+ */
 async function addTeamMember(team, isManager) {
   try {
     // Prompt the user for employee info
@@ -197,13 +195,13 @@ async function addTeamMember(team, isManager) {
 }
 
 /**
-  * @async Initialize the application and run it. Generate a series of prompts
-  * to allow the user to construct a team and then generate an HTML report of
-  * the team.
-  */
+ * @async Initialize the application and run it. Generate a series of prompts
+ * to allow the user to construct a team and then generate an HTML report of
+ * the team.
+ */
 async function init() {
   const team = []; // Array to store team members
-  let res;  // Hold the user reponses
+  let res; // Hold the user reponses
   let exitWhile = false; // Flag to tell us when to exit
 
   try {
@@ -240,7 +238,7 @@ async function init() {
           break;
       }
       // Remain in this loop until the user tells us to quit
-    } while (!exitWhile)
+    } while (!exitWhile);
     // Out of main loop - exit
     out.debug("\nEnding the shell\n");
   } catch (err) {
