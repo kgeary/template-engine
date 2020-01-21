@@ -33,9 +33,15 @@ describe("mustache-jr templating", function() {
     expect(result.indexOf("{{")).toBe(-1);
   });
 
+  it("should replace valid method names with parentheses (non-class)", function() {
+    const testValue = "{{ getName() }} {{ getName }} {{ age }}";
+    const testObj = {name: "Randy", age: "21", getName: function(){ return "Hello"; }};
+    const result = mj.update(testValue, testObj);
+    expect(result).toBe("Hello {{ getName }} 21");
+  });
 
-  it("should replace methods", function() {
-    const testValue = "{{ getName() }}";
+  it("should replace valid method names", function() {
+    const testValue = "{{ getName() }} {{ name }}";
     class TestClass {
       constructor() {
         this.name = "test";
@@ -48,7 +54,7 @@ describe("mustache-jr templating", function() {
 
     const testObj = new TestClass();
     const result = mj.update(testValue, testObj);
-    expect(result).toBe("21");
+    expect(result).toBe("21 test");
   });
 
   it("should not replace methods with args", function() {
