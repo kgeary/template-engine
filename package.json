@@ -1,7 +1,7 @@
 {
-  "name": "unit10hw",
+  "name": "template-engine",
   "version": "1.0.0",
-  "description": "OOP and testing for week 10 homework",
+  "description": "A templated HTML team generator",
   "main": "app.js",
   "directories": {
     "lib": "lib",
