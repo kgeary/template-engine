@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "jest --verbose --watch test/*"
+    "test": "jest --verbose test/*"
   },
   "repository": {
     "type": "git",
