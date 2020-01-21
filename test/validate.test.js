@@ -2,15 +2,33 @@ const validate = require("../lib/validate");
 
 describe("validate email", function() {
   it("Should accept valid email addresses", function() {
-    const testValue = "blah@blah.com"
+    const testValue = "blah@blah.com";
+    const result = validate.email(testValue);
+    expect(result).toBe(true);
+  })
+
+  it("Should accept valid email addresses", function() {
+    const testValue = "user_229@ab.co";
     const result = validate.email(testValue);
     expect(result).toBe(true);
   })
 
   it("Should not accept invalid email addresses with no at symbol", function() {
-    const testValue = "blah"
+    const testValue = "blah";
     const result = validate.email(testValue);
     expect(result).toBe("Input must be a valid email address!");
+  })
+
+  it("Should not accept invalid email addresses with no domain", function() {
+    const testValue = "blah@";
+    const result = validate.email(testValue);
+    expect(typeof result).toBe("string");
+  })
+
+  it("Should not accept invalid email addresses with no suffix", function() {
+    const testValue = "blah@ba";
+    const result = validate.email(testValue);
+    expect(typeof result).toBe("string");
   })
 })
 
@@ -49,8 +67,14 @@ describe("validate github", function() {
     expect(typeof result).toBe("string");
   })
 
-  it("Should not accept invalid profiles", function() {
-    const testValue = "3@";
+  it("Should not accept names with spaces", function() {
+    const testValue = "race car";
+    const result = validate.github(testValue);
+    expect(typeof result).toBe("string");
+  })
+
+  it("Should not accept blank names", function() {
+    const testValue = "";
     const result = validate.github(testValue);
     expect(typeof result).toBe("string");
   })
