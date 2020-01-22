@@ -1,4 +1,5 @@
 const fs = require("fs");
+const util = require("util")
 const inquirer = require("inquirer");
 const Engineer = require("./lib/engineer");
 const Intern = require("./lib/intern");
@@ -7,8 +8,12 @@ const validate = require("./lib/validate");
 const out = require("./lib/out");
 const report = require("./lib/report");
 
+// File Write File Async
+const fileWriteAsync = util.promisify(fs.writeFile);
+
 // Output Path
 const outputPath = "./output/team.html";
+
 // MAIN MENU COMMAND OPTIONS
 const ADD_MEMBER_STR = "ADD Member";
 const GENERATE_REPORT_STR = "Generate Report";
@@ -228,7 +233,7 @@ async function init() {
         // cmd = Generate a Report
         case GENERATE_REPORT_STR:
           let html = await report.generate(team);
-          fs.writeFileSync(outputPath, html, "utf8");
+          await fileWriteAsync(outputPath, html, "utf8");
           out.success("\nReport Generated\n");
           break;
 
