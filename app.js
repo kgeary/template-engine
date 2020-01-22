@@ -84,10 +84,10 @@ const specialRoles = {
 /**
  * Lookup the special role question from the Employee Role
  *
- * @param role
- * Employee Role (string)
+ * @param {string} role
+ * Employee Role
  *
- * @returns
+ * @returns {array}
  * 1 question array for Prompts with a special for that role question
  */
 function getSpecialRoleQuestion(role) {
@@ -108,10 +108,11 @@ function getSpecialRoleQuestion(role) {
 /**
  * @async Get Employee Info via prompts
  *
- * @param isManager
+ * @param {boolean} isManager
  * true if employee is a Manager
  *
- * @returns User input responses for a single employee
+ * @returns {Object}
+ * User input responses for a single employee
  */
 async function getEmployeeInfo(isManager) {
   // Select the prompts to used based on Manager or non-Manager
@@ -147,10 +148,11 @@ async function getEmployeeInfo(isManager) {
 /**
  * Create and return a new team member object
  *
- * @param input
+ * @param {Object} input
  * User Input response object with Employee Info responses
  *
- * @returns a new Employee object (Engineer, Intern, or Manager)
+ * @returns {Object}
+ * a new Employee object (Engineer, Intern, or Manager)
  */
 function createTeamMember(input) {
   let employee;
@@ -181,10 +183,10 @@ function createTeamMember(input) {
 /**
  * @async Add a team member to team array
  *
- * @param team
+ * @param {array} team
  * Team member object array
  *
- * @param isManager
+ * @param {boolean} isManager
  * true if adding a Manager, false otherwise
  */
 async function addTeamMember(team, isManager) {
