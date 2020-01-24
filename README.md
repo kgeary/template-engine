@@ -17,4 +17,4 @@ node app.js
 The generated report will appear as 'team.html' in the 'output' folder
 
 ## Example
-<a href="./example/example.html" target="_blank">Example Team Report</a>
+<a href="https://kgeary.github.io/template-engine/example/example.html" target="_blank">Example Team Report</a>
